@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Leilão · Alicerce</title>
+  <meta name="robots" content="noindex, nofollow">
+  <!--
+    WRAPPER ANTI /u/N/ — por que este arquivo existe
+    -------------------------------------------------
+    O web app do Apps Script e servido em script.google.com/macros/s/.../exec.
+    Com 2+ contas Google logadas, o Google reescreve a /exec para /u/0/, /u/1/…,
+    chuta o indice errado e mostra "Nao foi possivel abrir o arquivo". Carregando
+    a MESMA /exec dentro de um <iframe credentialless>, a partir de um dominio que
+    NAO e google.com, o app abre igual em qualquer navegador.
+
+    A casa ja resolveu isto tres vezes: Gerenciador de Escrituras (#9), Simulador
+    de Fluxo (#11) e Minha Carteira (#18). Este e o mesmo padrao.
+
+    PRE-REQUISITOS — os dois tem de valer, e em 29/08/2026 so UM valia:
+      1. [FALTA] Implantacao com "Executar como: Eu" + "Quem pode acessar:
+         Qualquer pessoa". O `appsscript.json` ja declara
+         (`webapp.access: ANYONE_ANONYMOUS`, travado por `tests/projeto.test.js`),
+         mas o deployment @21 que esta NO AR nasceu antes disso e segue RESTRITO.
+         Medido por curl sem credencial: 2 redirects, 905.719 B de tela de login,
+         `X-Frame-Options: DENY`. Enquanto for assim, o iframe abaixo carrega o
+         DENY e esta pagina mostra o aviso, nao o app.
+         >>> Republicar e Alcada 2. Passo a passo no README.md desta pasta. <<<
+      2. [OK] `doGet()` com `setXFrameOptionsMode(ALLOWALL)` — ja esta em
+         `apps-script/Codigo.gs:33`.
+
+    O QUE ISTO NAO E: nao e camada de seguranca. Quem barra e o login do proprio
+    app (ORD-006, `requireSession_` em toda funcao de servidor). Este arquivo so
+    resolve roteamento de conta.
+
+    POR QUE O LINK DA EQUIPE APONTA PARA CA, E NAO PARA A /exec: no dia em que o
+    deployment for recriado, a /exec muda. Trocando o endereco aqui dentro, o
+    link que cada pessoa salvou continua o mesmo.
+  -->
+  <style>
+    /* O app guarda o tema em localStorage['leilao-modo'], que e POR ORIGEM —
+       esta pagina esta noutro dominio e nao consegue ler. Entao a casca segue
+       o tema do sistema: sem isto, quem usa escuro leva um flash branco de
+       tela cheia antes do app pintar. */
+    :root { color-scheme: light dark; --casca:#fafafa; --tinta:#09090b; --fraca:#6c6c75; }
+    @media (prefers-color-scheme: dark) {
+      :root { --casca:#09090b; --tinta:#fafafa; --fraca:#a1a1aa; }
+    }
+    html, body { margin: 0; height: 100%; background: var(--casca); }
+    #app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+    .estado {
+      position: fixed; inset: 0; display: flex;
+      align-items: center; justify-content: center; padding: 24px;
+      font: 14px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--fraca); text-align: center;
+    }
+    #aviso { display: none; color: var(--tinta); }
+    #aviso a { color: var(--tinta); font-weight: 600; }
+    #aviso p { margin: 0 0 12px; }
+    .miudo { color: var(--fraca); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="estado" id="carregando">Abrindo o Leilão…</div>
+
+  <!--
+    credentialless: carrega o iframe num contexto efemero, SEM os cookies de
+    sessao do Google (como uma aba anonima) — e e isso que contorna o roteador
+    /u/N/. Chromium (Chrome/Edge 110+). Firefox e Safari ignoram o atributo;
+    para eles o aviso abaixo oferece o link direto depois de 12s.
+  -->
+  <iframe
+    id="app"
+    credentialless
+    src="https://script.google.com/macros/s/AKfycbwSlTqM_AVNzw9dWS2u_WD5nbYbRSOIJaRbFwZakKxEVVVMfh2vObwRISL3POwD3vCUOA/exec"
+    title="Leilão · Alicerce"
+    allow="clipboard-write; fullscreen"
+    referrerpolicy="no-referrer"
+    onload="document.getElementById('carregando').style.display='none'"></iframe>
+
+  <div class="estado" id="aviso">
+    <div>
+      <p><strong>O Leilão não abriu por aqui.</strong></p>
+      <p>Abra direto neste link:<br>
+        <a href="https://script.google.com/macros/s/AKfycbwSlTqM_AVNzw9dWS2u_WD5nbYbRSOIJaRbFwZakKxEVVVMfh2vObwRISL3POwD3vCUOA/exec"
+           target="_blank" rel="noopener">abrir o Leilão</a>
+      </p>
+      <p class="miudo">Se pedir para escolher uma conta do Google, escolha a sua —
+        a mesma de sempre. Depois disso o login do app pede seu usuário.</p>
+    </div>
+  </div>
+
+  <script>
+    // Se o iframe nao sinalizar load em ~12s, oferece o link direto em vez de
+    // deixar a pessoa olhando "Abrindo o Leilão…" para sempre. Hoje este e o
+    // caminho que a equipe vai ver, porque o deployment ainda esta restrito.
+    setTimeout(function () {
+      var ld = document.getElementById('carregando');
+      if (ld && ld.style.display !== 'none') {
+        ld.style.display = 'none';
+        document.getElementById('aviso').style.display = 'flex';
+      }
+    }, 12000);
+  </script>
+</body>
+</html>
