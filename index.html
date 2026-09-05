@@ -17,17 +17,24 @@
     A casa ja resolveu isto tres vezes: Gerenciador de Escrituras (#9), Simulador
     de Fluxo (#11) e Minha Carteira (#18). Este e o mesmo padrao.
 
-    PRE-REQUISITOS — os dois tem de valer, e em 29/08/2026 so UM valia:
-      1. [FALTA] Implantacao com "Executar como: Eu" + "Quem pode acessar:
-         Qualquer pessoa". O `appsscript.json` ja declara
-         (`webapp.access: ANYONE_ANONYMOUS`, travado por `tests/projeto.test.js`),
-         mas o deployment @21 que esta NO AR nasceu antes disso e segue RESTRITO.
-         Medido por curl sem credencial: 2 redirects, 905.719 B de tela de login,
-         `X-Frame-Options: DENY`. Enquanto for assim, o iframe abaixo carrega o
-         DENY e esta pagina mostra o aviso, nao o app.
-         >>> Republicar e Alcada 2. Passo a passo no README.md desta pasta. <<<
-      2. [OK] `doGet()` com `setXFrameOptionsMode(ALLOWALL)` — ja esta em
-         `apps-script/Codigo.gs:33`.
+    PRE-REQUISITOS — os dois tem de valer, e desde 05/09/2026 os dois valem:
+      1. [OK] Implantacao com "Executar como: Eu" + "Quem pode acessar: Qualquer
+         pessoa" — `webapp.access: ANYONE_ANONYMOUS` no manifesto do v2.
+      2. [OK] `doGet()` com `setXFrameOptionsMode(ALLOWALL)` — `Api.gs:26`.
+      Medido em 05/09 por curl com UA de navegador: HTTP 200, 31.621 B, a tela
+      de login do app no corpo, e SEM `X-Frame-Options`.
+
+    O QUE MUDOU EM 05/09 — ESTE WRAPPER PASSOU A APONTAR PARA O v2
+    ---------------------------------------------------------------
+    Ate aqui ele embutia o app ANTIGO (`gerenciador de leilao`, #15), cujo
+    deployment @21 nasceu RESTRITO — medido em 29/08: 2 redirects, 905.719 B de
+    tela de login do Google e `X-Frame-Options: DENY`. Ou seja, esta pagina
+    nunca chegou a servir aquele app: mostrava o aviso, nao a tela.
+
+    Agora ela aponta para o Leilao v2 (deployment @4, F4 completa), que nasceu
+    com os dois pre-requisitos certos. Para quem abre, e o mesmo endereco de
+    sempre — que e exatamente a razao de este arquivo existir: a virada
+    acontece aqui dentro, e ninguem precisa trocar o link que salvou.
 
     O QUE ISTO NAO E: nao e camada de seguranca. Quem barra e o login do proprio
     app (ORD-006, `requireSession_` em toda funcao de servidor). Este arquivo so
@@ -72,7 +79,7 @@
   <iframe
     id="app"
     credentialless
-    src="https://script.google.com/macros/s/AKfycbwSlTqM_AVNzw9dWS2u_WD5nbYbRSOIJaRbFwZakKxEVVVMfh2vObwRISL3POwD3vCUOA/exec"
+    src="https://script.google.com/macros/s/AKfycbwT4ZmB67blq0u-4TjLXxAlRyhU-HLmqv0GCC38VraW_Xl-7vFqoSk9r8OWNO_dTmzz/exec"
     title="Leilão · Alicerce"
     allow="clipboard-write; fullscreen"
     referrerpolicy="no-referrer"
@@ -82,7 +89,7 @@
     <div>
       <p><strong>O Leilão não abriu por aqui.</strong></p>
       <p>Abra direto neste link:<br>
-        <a href="https://script.google.com/macros/s/AKfycbwSlTqM_AVNzw9dWS2u_WD5nbYbRSOIJaRbFwZakKxEVVVMfh2vObwRISL3POwD3vCUOA/exec"
+        <a href="https://script.google.com/macros/s/AKfycbwT4ZmB67blq0u-4TjLXxAlRyhU-HLmqv0GCC38VraW_Xl-7vFqoSk9r8OWNO_dTmzz/exec"
            target="_blank" rel="noopener">abrir o Leilão</a>
       </p>
       <p class="miudo">Se pedir para escolher uma conta do Google, escolha a sua —
